@@ -1,6 +1,10 @@
 source 'http://rubygems.org'
+gem 'rake'
+
 gem 'sinatra'
 gem 'unicorn'
+gem 'resque'
+gem 'resque-status'
 
 gem 'omniauth'
 gem 'omniauth-vkontakte'
