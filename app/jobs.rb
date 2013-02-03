@@ -1,15 +1,27 @@
 require 'sidekiq'
+require 'sidekiq-status'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'slowweb'
 require 'vkontakte_api'
 require 'amatch'
 
-# limit to 3 requests per second
+
+# vk.com limits to 3/sec api requests
+# 10/min, 50/hr audio.add requests
 SlowWeb.limit 'api.vk.com', 3, 1
-
-
 Sidekiq::Middleware::Server::RetryJobs.send(:remove_const, 'DELAY')
 Sidekiq::Middleware::Server::RetryJobs.const_set('DELAY', proc { |count| [60, 60*60][count] || count*60*60 })
+Sidekiq.configure_client do |config|
+  config.client_middleware do |chain|
+    chain.add Sidekiq::Status::ClientMiddleware
+  end
+end
+Sidekiq.configure_server do |config|
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Status::ServerMiddleware
+  end
+end
+
 
 module ImportHelpers
   def normalize_song(song)
@@ -31,9 +43,11 @@ module ImportHelpers
   end
 end
 
+
 class ImportSongs
   include ImportHelpers
   include Sidekiq::Worker
+  include Sidekiq::Status::Worker
 
   sidekiq_options :retry => 3
 
@@ -41,7 +55,6 @@ class ImportSongs
     vk = VkontakteApi::Client.new token
 
     remove_duplicates! songs, vk.audio.get
-
     songs.each do |song|
       find_and_add vk, song
     end

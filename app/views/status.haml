@@ -1,0 +1,38 @@
+-# coding: utf-8
+
+.twelve.columns.centered.text-center
+  %h4
+    %span.subheader Статус:
+    - if status == 'queued'
+      в очереди на исполнение
+    - elsif status == 'working'
+      в процессе импорта
+    - elsif status == 'complete'
+      импорт удачно завершен
+    - elsif status == 'failed'
+      приложение ожидает возможности продолжить работу
+    - else
+      задачи с таким номером не существует
+
+%p.subheader
+  Эта страница автоматически обновляется раз в пять минут.
+
+%h2.subheader Почему так медленно?
+%h5.no-marg-top.subheader.eight
+  Вконтакте ограничивает как количество обращений к API в секунду (3), так и
+  возможное количество добавленых аудиозаписей в минуту (10) и в час (50), по
+  этому обработка большого плейлиста может занять значительное количество
+  времени, скажем плейлист из 500 песен вряд ли будет импортирован быстрее,
+  чем за 10 часов.
+%h2.subheader Чем бы мне заняться?
+%h5.no-marg-top.subheader.eight
+  Конечно же
+  = succeed '.' do
+    %a{href: 'http://procatinator.com/', target: '_blank'} посмотреть котов
+%h2.subheader Как мне вернуться обратно?
+%h5.no-marg-top.subheader.eight
+  = succeed '.' do
+    %a{href: '/'} Вот так
+
+:javascript
+  setTimeout("location.reload(true);", 5*60*1000);

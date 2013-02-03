@@ -1,0 +1,46 @@
+-# coding: utf-8
+!!!
+%html
+  %head
+    %meta{charset: "utf-8"}
+    %meta{name: "viewport", content: "width=device-width"}
+    %meta{'http-equiv' => 'Content-Type', :content => 'text/html; charset=UTF-8'}
+    %link{rel: 'stylesheet', href: '/stylesheets/app.css'}
+    %title Импортер плейлистов из Last.Fm во вконтакте
+  %body
+    .row
+      .ten.columns.centered
+        %h1.subheader Импорт плейлистов last.fm во вконтакте
+        = yield
+
+    :javascript
+      var _ues = {
+      host:'lastfmtovk.userecho.com',
+      forum:'17354',
+      lang:'ru',
+      tab_corner_radius:0,
+      tab_font_size:20,
+      tab_image_hash:'0L7RgdGC0LDQstC40YLRjCDQvtGC0LfRi9Cy',
+      tab_alignment:'left',
+      tab_text_color:'#FAFAFA',
+      tab_text_shadow_color:'#00000055',
+      tab_bg_color:'#000000',
+      tab_hover_color:'#4FAB38'
+      };
+
+      (function() {
+          var _ue = document.createElement('script'); _ue.type = 'text/javascript'; _ue.async = true;
+          _ue.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'cdn.userecho.com/js/widget-1.4.gz.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(_ue, s);
+        })();
+
+    :javascript
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-38205868-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();

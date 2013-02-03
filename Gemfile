@@ -4,6 +4,10 @@ gem 'rake'
 gem 'sinatra'
 gem 'unicorn'
 gem 'sidekiq'
+gem 'sidekiq-status'
+
+gem 'haml'
+gem 'zurb-foundation'
 
 gem 'omniauth'
 gem 'omniauth-vkontakte'
