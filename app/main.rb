@@ -7,8 +7,6 @@ end
 require 'sinatra'
 require 'omniauth'
 require 'omniauth-vkontakte'
-require 'resque'
-require 'resque-remote'
 
 require './app/helpers'
 require './app/jobs'
@@ -42,9 +40,9 @@ post '/' do
     if File.extname(params[:file][:filename]) != '.tsv'
       "Incorrect file format, .tsv expected"
     else
-      job_id = ImportSongs.create token: session[:token], songs: parse_tsv(params[:file][:tempfile])[0..15]
+      job_ids = ImportSongs.perform_async session[:token], parse_tsv(params[:file][:tempfile]).reverse[0..80]
 
-      "fuck yea #{job_id}"
+      "fuck yea #{job_ids.inspect}"
     end
   else
     'meow'

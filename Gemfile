@@ -3,8 +3,7 @@ gem 'rake'
 
 gem 'sinatra'
 gem 'unicorn'
-gem 'resque'
-gem 'resque-status'
+gem 'sidekiq'
 
 gem 'omniauth'
 gem 'omniauth-vkontakte'
