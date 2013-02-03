@@ -9,6 +9,13 @@
         Поддерживается только формат TSV
   .row
     .four.columns
+      %label.right.inline
+        ID группы
+        %p.subheader (необязательно)
+    .eight.columns
+      %input{type: "text", name: "gid"}
+  .row
+    .four.columns
     .eight.columns
       %input.button{type: "submit", value: "Загрузить"}
 

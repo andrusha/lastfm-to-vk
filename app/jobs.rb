@@ -11,6 +11,8 @@ require 'amatch'
 SlowWeb.limit 'api.vk.com', 3, 1
 Sidekiq::Middleware::Server::RetryJobs.send(:remove_const, 'DELAY')
 Sidekiq::Middleware::Server::RetryJobs.const_set('DELAY', proc { |count| [60, 60*60][count] || count*60*60 })
+Sidekiq::Status.send(:remove_const, 'DEFAULT_EXPIRY')
+Sidekiq::Status.const_set('DEFAULT_EXPIRY', 2*24*60*60)
 Sidekiq.configure_client do |config|
   config.client_middleware do |chain|
     chain.add Sidekiq::Status::ClientMiddleware
@@ -49,24 +51,28 @@ class ImportSongs
   include Sidekiq::Worker
   include Sidekiq::Status::Worker
 
-  sidekiq_options :retry => 3
+  sidekiq_options :retry => 5
 
-  def perform(token, songs)
+  def perform(token, songs, gid = nil)
     vk = VkontakteApi::Client.new token
 
-    remove_duplicates! songs, vk.audio.get
+    params = gid.empty? ? {} : {gid: gid}
+    remove_duplicates! songs, vk.audio.get(params)
     songs.each do |song|
-      find_and_add vk, song
+      find_and_add vk, song, gid
     end
   end
 
-  def find_and_add(vk, song)
+  def find_and_add(vk, song, gid = nil)
     results = vk.audio.search(q: to_song_title(song), count: 10)[1..-1]
     return puts "No results for #{song.inspect}"  if results.nil?
 
     result = closest_match results, song
     return puts "Can't find #{result.inspect}"    if result.nil?
-    vk.audio.add aid: result.aid, oid: result.owner_id
+
+    params       = {aid: result.aid, oid: result.owner_id}
+    params[:gid] = gid  unless gid.empty?
+    vk.audio.add params
   end
 
 end

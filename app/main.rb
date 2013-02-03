@@ -48,7 +48,8 @@ post '/' do
     if File.extname(params[:file][:filename]) != '.tsv'
       haml :upload
     else
-      job_id = ImportSongs.perform_async session[:token], parse_tsv(params[:file][:tempfile]).reverse
+      songs  = parse_tsv(params[:file][:tempfile]).reverse
+      job_id = ImportSongs.perform_async session[:token], songs, params[:gid]
 
       redirect to "/status/#{job_id}"
     end
