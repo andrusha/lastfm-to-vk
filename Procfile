@@ -1,1 +1,1 @@
-web: web_and_worker
+web: bin/web_and_worker

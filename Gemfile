@@ -4,9 +4,10 @@ gem 'rake'
 gem 'sinatra'
 gem 'unicorn'
 gem 'sidekiq'
-gem 'sidekiq-status'
+gem 'sidekiq-status', git: 'git://github.com/utgarda/sidekiq-status.git'
 
 gem 'haml'
+gem 'slim'
 gem 'zurb-foundation'
 
 gem 'omniauth'
