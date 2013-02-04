@@ -48,6 +48,8 @@ class App < Sinatra::Base
       scope: 'audio', display: 'page'
   end
 
+  use Rack::Deflater
+
 
   get '/' do
     if is_valid_session? session
