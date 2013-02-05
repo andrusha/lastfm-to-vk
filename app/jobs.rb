@@ -9,18 +9,31 @@ require 'amatch'
 # vk.com limits to 3/sec api requests
 # 10/min, 50/hr audio.add requests
 SlowWeb.limit 'api.vk.com', 3, 1
-Sidekiq::Middleware::Server::RetryJobs.send(:remove_const, 'DELAY')
-Sidekiq::Middleware::Server::RetryJobs.const_set('DELAY', proc { |count| [60, 60*60][count] || count*60*60 })
-Sidekiq::Status.send(:remove_const, 'DEFAULT_EXPIRY')
-Sidekiq::Status.const_set('DEFAULT_EXPIRY', 2*24*60*60)
+
+Sidekiq::Middleware::Server::RetryJobs.class_eval do
+  include Sidekiq::Status::Storage
+
+  remove_const 'DELAY'
+  const_set    'DELAY', proc { |count| [60, 60*60][count] || count*60*60 }
+
+  alias_method :old_call, :call
+
+  def call(worker, msg, queue, &block)
+    msg.delete 'retry_count'  if read_field_for_id(worker.jid, :reset_retries) == 'true'
+
+    old_call worker, msg, queue, &block
+  end
+end
+
 Sidekiq.configure_client do |config|
   config.client_middleware do |chain|
     chain.add Sidekiq::Status::ClientMiddleware
   end
 end
+
 Sidekiq.configure_server do |config|
   config.server_middleware do |chain|
-    chain.add Sidekiq::Status::ServerMiddleware
+    chain.add Sidekiq::Status::ServerMiddleware, expiration: 2*24*60*60
   end
 end
 
@@ -53,13 +66,26 @@ class ImportSongs
 
   sidekiq_options :retry => 5
 
-  def perform(token, songs, gid = nil)
+  def perform(token, songs_list, gid = nil)
     vk = VkontakteApi::Client.new token
+
+    songs = Sidekiq.load_json(retrieve(:songs) || 'null') || songs_list
 
     params = gid.empty? ? {} : {gid: gid}
     remove_duplicates! songs, vk.audio.get(params)
+
+    completed = 0
     songs.each do |song|
       find_and_add vk, song, gid
+      completed += 1
+    end
+  ensure
+    if completed && completed > 0
+      store reset_retries: true
+      at retrieve(:num).to_i + completed, songs_list.length
+      store({songs: Sidekiq.dump_json(songs.drop(completed))})
+    else
+      store reset_retries: false
     end
   end
 

@@ -75,9 +75,11 @@ class App < Sinatra::Base
   end
 
   get '/status/:job_id' do |job_id|
-    status = Sidekiq::Status::get job_id
+    status = Sidekiq::Status::status job_id
+    done   = Sidekiq::Status::num    job_id
+    total  = Sidekiq::Status::total  job_id
 
-    haml :status, locals: {status: status}
+    haml :status, locals: {status: status, done: done, total: total}
   end
 
   get '/auth/vkontakte/callback' do

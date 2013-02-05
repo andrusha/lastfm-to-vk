@@ -5,7 +5,7 @@ gem 'sinatra'
 gem 'sinatra-support'
 gem 'unicorn'
 gem 'sidekiq'
-gem 'sidekiq-status', git: 'git://github.com/utgarda/sidekiq-status.git'
+gem 'sidekiq-status', git: 'git://github.com/andrusha/sidekiq-status.git'
 
 gem 'haml'
 gem 'slim'
